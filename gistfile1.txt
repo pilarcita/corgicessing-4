@@ -1,0 +1,294 @@
+//Corgicessing 
+//el perrino tiene mucha hambre y quiere que lo ayudes!
+//para hacer que el perrino se ponga feliz sólo debes acercarle el huesito a la boca
+//para hacer que engorde tienes que darle comida ¡ten cuidado con otras cosas!
+
+
+PImage huesito;
+PImage cola;
+PImage caquita;
+PFont font;
+
+
+int x;
+int y;
+int i;
+
+float mx;
+float my;
+float easing = 0.5;
+
+
+float bx;
+float by;
+
+boolean sonrisita = false;
+boolean locked = false;
+
+boolean colita = false;
+boolean asquito;
+
+
+float a, b; //xpos1, ypos1
+
+int rad1 =60;
+
+
+float xspeed1=random(0,1.5); //speed of the shape
+float yspeed1=random(0,1.2); //speed of the shape
+
+int xdirection=1; //left or right
+int ydirection=1; //top to bottom
+
+int unit = 70;
+int count;
+Module[] mods;
+
+/*float a = random (400);
+ float b = random (300);
+ float c = random (200);*/
+
+void setup() {
+  size (600, 600, P2D);
+  //frameRate(50);
+
+//noCursor();
+  huesito = loadImage("huesito2.png");
+
+  bx=50;
+  by=50;
+
+  cola = loadImage ("colita.png");
+  font = loadFont ("SusaBold-24.vlw");
+  caquita= loadImage ("caquita.png");
+
+  a=width/2;
+  b=height/2;
+
+  int wideCount = width / unit;
+  int highCount = height / unit;
+  count = wideCount * highCount;
+  mods = new Module[count];
+
+  int index = 0;
+  for (int y = 0; y < highCount; y++) {
+    for (int x = 0; x < wideCount; x++) {
+      mods[index++] = new Module(x*unit, y*unit, unit/2, unit/2, random(0.05, 0.8), unit);
+    }
+  }
+
+  //frameRate(16);
+}
+
+
+void draw() {
+  frameRate(24);
+  noStroke();
+  //fondo
+  background(200, mouseY, mouseX, mouseY);  
+
+  //huesito que se mueve 
+  pushMatrix();
+ 
+  a = a + ( xspeed1 * xdirection );
+  b = b + ( yspeed1 * ydirection );  
+
+  if (a > width-rad1 || a < rad1) {
+    xdirection*= -1;
+  }
+  if (b > height-rad1 || b < rad1) {
+    ydirection *= -1;
+  }
+
+  // Draw the huesito
+  image(huesito, a, b, 100, 44);
+  popMatrix();
+
+
+  //empieza el festival de cacas
+  for (Module mod : mods) {
+    mod.update();
+    mod.display();
+
+    //instrucciones 
+    
+    fill(200, mouseY, mouseX, mouseY);
+    noStroke();
+    rect (200, 590, 165, 40);
+    textFont(font, 20);
+    fill(255);
+    textAlign(CENTER);
+    text ("¡Haz feliz al corgi!", 280, 590);
+
+    // comienza el perrito
+    pushMatrix();
+    translate(mouseX-60, mouseY-80);
+    noStroke();
+    //cabeza
+    fill(255);
+    ellipse(120, 100, 70, 65);
+
+    //ojo sigue al mouse
+    if (abs(mouseX - mx) > 1) {
+      mx = mx + (mouseX - mx) * easing;
+    }
+    if (abs(mouseY - my) > 1) {
+      my = my + (mouseY- my) * easing;
+    }
+
+    float distance= easing;
+    mx = constrain(mx, 107, 114);  //x co-ordinates for eye (min, max)  mx = constrain(mx, inner, width - inner);
+    my = constrain(my, 93, 98);  //y co-ordinate for eye (min, max)      my = constrain(my, inner, height - inner);            
+
+    fill(255);
+    stroke(0);
+    strokeWeight(1.5);
+    ellipse (110, 95, 18, 18); // parte de afuera ojo
+    fill(0);
+    noStroke();
+    ellipse(mx, my, 10, 12);   //ellipse(mx, my, radius, radius); pupila
+  
+    fill(255);   //borde oreja
+    bezier(116, 75, 142, 35, 140, 35, 146, 80);
+  
+    fill(255, 151, 139);   //interior oreja 
+    bezier(125, 78, 136, 50, 140, 50, 138, 78);
+
+    fill(255, 255, 255);     //hocico
+    arc(99, 90, 75, 65, HALF_PI, PI);
+    noStroke();
+    fill(0, 0, 0);
+    triangle(61, 90, 68, 90, 63, 100);
+
+    fill(255);   //patitas derecha
+    bezier(124, 189, 134, 229, 144, 229, 154, 200); //patita delantera derecha
+
+    bezier(190, 195, 200, 229, 210, 229, 220, 185); //patita trasera derecha
+
+    fill(255, 255, 255);    //cuerpito
+    rectMode(CORNER);
+    rect(100, 128, 160, 30, 7);
+    arc(180, 150, 160, 110, 0, PI);
+    noStroke();
+    fill(245, 169, 111);
+    arc(200, 128, 119, 130, 0, PI);
+
+    fill(255, 77, 77); //collar
+    noStroke();
+    rect(97, 125, 48, 6, 4);
+
+    
+    fill(255); //patita delantera izquierda
+    bezier(150, 189, 160, 229, 170, 229, 180, 200);
+
+    noStroke(); //patita trasera izquierda 
+    bezier(210, 195, 220, 229, 230, 229, 240, 185);
+
+    //colita
+    image (cola, 260, 100, 60, 50);
+   popMatrix();
+  } 
+  
+  
+    //corgi sonríe cuando hace click sobre huesito // esto tiene que ir al final porque sino la acción se tapa con el resto del dibujo
+
+   if(get(mouseX,mouseY)== color(252,243,182)) {
+  sonrisita = true;
+      if (!locked) {
+        
+        pushMatrix();
+    noStroke();
+    fill(255);
+    ellipse(mouseX+60, mouseY+20, 70, 65);
+        fill(255, 151, 139); 
+        noStroke();
+        ellipse(mouseX+60,mouseY+27,20,20); //mejilla
+        strokeWeight(2);
+        stroke(0);
+        noFill();
+        arc(mouseX+10, mouseY+25, 16, 14, 0, HALF_PI); //sonrisa
+        strokeWeight(3);
+        arc(mouseX+55, mouseY+15, 20, 15, 0, PI); //ojo feliz
+         fill(255, 77, 77); //collar
+    noStroke();
+    rect(mouseX+37, mouseY+45, 48, 6, 4);
+       
+    popMatrix();
+   
+      }
+   }
+
+     if(get(mouseX,mouseY)== color(47,53,21)) {
+  asquito = true;
+      if (!locked) {
+        
+        pushMatrix();
+    noStroke();
+    fill(255);
+    ellipse(mouseX+60, mouseY+20, 70, 65); //cabeza
+     fill(255, 77, 77); //collar
+     rect(mouseX+37, mouseY+45, 48, 6, 4);
+     
+        strokeWeight(3);
+        stroke(0);
+        noFill();
+        line(mouseX+50, mouseY+20, mouseX+60,mouseY+10);//ojos
+        line(mouseX+50, mouseY+10, mouseX+60,mouseY+20);
+        stroke(2);
+        line(mouseX+10,mouseY+30,mouseX+25,mouseY+30);//boca
+        fill(255, 151, 139); 
+           arc(mouseX+21,mouseY+31, 8,16,0,PI); //lengua
+        
+     popMatrix();
+   
+    }
+    } 
+
+   
+    
+    } 
+
+   
+
+
+class Module {
+  int xOffset;
+  int yOffset;
+  float x, y;
+  int unit;
+  int xDirection = 1;
+  int yDirection = 1;
+  float speed; 
+
+  // Contructor
+  Module(int xOffsetTemp, int yOffsetTemp, int xTemp, int yTemp, float speedTemp, int tempUnit) {
+    xOffset = xOffsetTemp;
+    yOffset = yOffsetTemp;
+    x = xTemp;
+    y = yTemp;
+    speed = speedTemp;
+    unit = tempUnit;
+  }
+
+  // Custom method for updating the variables
+  void update() {
+    x = x + (speed * xDirection);
+    if (x >= unit || x <= 0) {
+      xDirection *= -1;
+      x = x + (1 * xDirection);
+      y = y + (1 * yDirection);
+    }
+    if (y >= unit || y <= 0) {
+      yDirection *= -1;
+      y = y + (1 * yDirection);
+    }
+  }
+
+  // Custom method for drawing the object
+  void display() {
+    fill(255);
+    image(caquita, xOffset + x, yOffset + y, 40, 40);
+  }
+}
+
+
